@@ -189,3 +189,42 @@ export function upstream(nodeId, edges) {
   }
   return out;
 }
+
+// DEPTH — topological rank, derived from edges. Do NOT store this.
+// Needed because `layer` is semantic, not ordinal: solar has four stages that
+// are all legitimately 'component' (wafer -> cell -> glass -> module inputs),
+// so a UI that lays out by `layer` will stack them on top of each other.
+// Layout by depth; filter by layer.
+export function depths(nodes, edges) {
+  const rank = Object.fromEntries(nodes.map((n) => [n.id, 0]));
+  // Longest-path relaxation. Terminates because the graph is acyclic.
+  for (let i = 0; i < nodes.length; i++) {
+    let changed = false;
+    for (const e of edges) {
+      if (rank[e.to] < rank[e.from] + 1) {
+        rank[e.to] = rank[e.from] + 1;
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  return rank;
+}
+
+// Guard: a cycle would mean the chain loops (e.g. recycling). Catch it early.
+export function findCycles(nodes, edges) {
+  const adj = {};
+  for (const n of nodes) adj[n.id] = [];
+  for (const e of edges) adj[e.from]?.push(e.to);
+  const state = {};
+  const bad = [];
+  const walk = (id) => {
+    if (state[id] === 1) { bad.push(id); return; }
+    if (state[id] === 2) return;
+    state[id] = 1;
+    for (const nxt of adj[id] || []) walk(nxt);
+    state[id] = 2;
+  };
+  for (const n of nodes) walk(n.id);
+  return bad;
+}
