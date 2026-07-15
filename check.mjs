@@ -1,36 +1,30 @@
-import { validate, fragility, riskType, downstream, depths, findCycles } from './data/graph/schema.js';
-import ev from './data/graph/ev.js';
-import solar from './data/graph/solar.js';
+import { validate, findCycles, depths } from './data/graph/schema.js';
+import { graph, scored, sharedStages, SECTORS, forSector, downstreamOf, nodes } from './data/graph/index.js';
 
-const sectors = { ev, solar };
-let fail = false;
+const errs = validate(graph);
+const cyc = findCycles(graph.nodes, graph.edges);
+console.log(`MERGED GRAPH — ${graph.stages.length} stages, ${graph.nodes.length} nodes, ${graph.edges.length} edges`);
+console.log(errs.length ? 'ERRORS:\n  ' + errs.join('\n  ') : '  valid: 0 errors');
+console.log(cyc.length ? '  CYCLE at: ' + cyc.join(', ') : '  acyclic: ok');
 
-for (const [name, g] of Object.entries(sectors)) {
-  const errs = validate(g);
-  const cyc = findCycles(g.nodes, g.edges);
-  if (errs.length || cyc.length) fail = true;
-  console.log(`\n=== ${name.toUpperCase()} — ${g.stages.length} stages, ${g.nodes.length} nodes, ${g.edges.length} edges`);
-  console.log(errs.length ? 'ERRORS:\n  ' + errs.join('\n  ') : '  valid: 0 errors');
-  if (cyc.length) console.log('  CYCLE at: ' + cyc.join(', '));
-
-  const rows = g.stages
-    .map(s => ({ id: s.id, f: fragility(s.C,s.S,s.L), cs: s.costShare, r: riskType(fragility(s.C,s.S,s.L), s.costShare) }))
-    .sort((a,b) => b.f - a.f).slice(0, 5);
-  console.log('  top 5 fragility:');
-  for (const r of rows) console.log(`    ${String(r.f).padStart(2)}  ${r.id.padEnd(22)} cost:${r.cs.padEnd(5)} ${r.r}`);
+for (const sec of SECTORS) {
+  const g = forSector(sec);
+  console.log(`\n=== ${sec.toUpperCase()} — ${g.stages.length} stages, ${g.nodes.length} nodes, depth ${Math.max(...Object.values(g.depths))}`);
+  for (const s of [...g.stages].sort((a,b)=>b.fragility-a.fragility).slice(0,4))
+    console.log(`   ${String(s.fragility).padStart(2)}  ${s.id.padEnd(24)} ${s.costShare.padEnd(5)} ${s.riskType}${s.firmConcentration ? '  [LOWER BOUND: firm-level]' : ''}`);
 }
 
-// cross-sector shared stages
-const all = Object.values(sectors).flatMap(g => g.stages);
-const shared = all.filter(s => s.sectors.length > 1);
-console.log('\n=== SHARED STAGES (the cross-sector finding)');
-for (const s of shared) console.log(`  ${s.id.padEnd(16)} fragility ${fragility(s.C,s.S,s.L)}  serves: ${s.sectors.join(' + ')}`);
+console.log('\n=== SHARED STAGES');
+for (const s of sharedStages) console.log(`  ${String(s.fragility).padStart(2)}  ${s.id.padEnd(18)} ${s.sectors.join(' + ')}`);
 
-// depth check on solar
-const d = depths(solar.nodes, solar.edges);
-const maxD = Math.max(...Object.values(d));
-console.log(`\nSolar max depth: ${maxD}. Layout ranks derived OK.`);
-console.log(`Downstream of wafer-cn: ${downstream('wafer-cn', solar.edges).size} of ${solar.nodes.length} nodes`);
-console.log(`Downstream of poly-cn-xj: ${downstream('poly-cn-xj', solar.edges).size} of ${solar.nodes.length} nodes`);
+console.log('\n=== BLAST RADIUS (cross-sector, from the merged graph)');
+for (const id of ['ree-sep-cn','gr-anode-cn','wafer-cn']) {
+  const d = downstreamOf(id);
+  console.log(`  ${id.padEnd(12)} -> ${String(d.size).padStart(2)} of ${nodes.length} nodes`);
+}
 
-process.exit(fail ? 1 : 0);
+console.log('\n=== FRAGILITY >= 7, ALL SECTORS');
+for (const s of scored.filter(s=>s.fragility>=7).sort((a,b)=>b.fragility-a.fragility))
+  console.log(`  ${String(s.fragility).padStart(2)}  ${s.id.padEnd(24)} ${s.riskType.padEnd(12)} ${s.sectors.join('+')}`);
+
+process.exit(errs.length || cyc.length ? 1 : 0);

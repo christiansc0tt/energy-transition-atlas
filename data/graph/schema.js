@@ -128,6 +128,15 @@ export function validate({ stages, nodes, edges }) {
     if (!['low', 'mid', 'high'].includes(s.costShare)) e('bad costShare');
     if (!CONF.includes(s.confidence)) e('bad confidence');
     if (s.confidence === 'sourced' && !(s.sources || []).length) e('sourced but no sources');
+    // Optional. Present only where the binding concentration is firm/plant level
+    // rather than country level (wind forgings, WTIVs). Where it exists, the
+    // fragility score is a LOWER BOUND and the UI must say so.
+    if (s.firmConcentration) {
+      const f = s.firmConcentration;
+      if (!(f.top3Share >= 0 && f.top3Share <= 1)) e('firmConcentration.top3Share must be 0-1');
+      if (!CONF.includes(f.confidence)) e('firmConcentration: bad confidence');
+      if (!f.note) e('firmConcentration: note required — explain what the constraint physically is');
+    }
   }
 
   for (const n of nodes) {

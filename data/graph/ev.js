@@ -154,26 +154,10 @@ export const stages = [
       'per kWh, not less. The standard "just use LFP" answer makes this exposure worse.',
   },
 
-  // --- RARE EARTHS (SHARED WITH WIND) ---
-  {
-    id: 'ree-separation',
-    label: 'Rare earth separation (Nd/Pr/Dy/Tb)',
-    sectors: ['ev', 'wind'], // <-- the cross-sector node
-    layer: 'refining',
-    material: 'rare-earths',
-    C: 4, S: 3, L: 2, // 9  <-- joint highest in EV
-    costShare: 'low',
-    carbon: null,
-    policy: ['China export controls (2023, 2025 expansions)', 'EU CRMA strategic project targets'],
-    confidence: 'modelled',
-    sources: ['USGS Mineral Commodity Summaries', 'IEA Critical Minerals Outlook'],
-    notes:
-      'Fragility 9 with LOW cost share = the definitive LINE-STOP node. Separated ' +
-      'neodymium is a rounding error on an EV BOM and can halt the line anyway. This is ' +
-      'the single best argument in the atlas for not folding cost share into fragility. ' +
-      'S=3: you cannot substitute for the element itself at this stage. ' +
-      'SHARED WITH WIND — this node is why the atlas exists.',
-  },
+  // --- RARE EARTHS ---
+  // NOTE: 'ree-separation' now lives in shared.js — it serves EV and wind.
+  // Edges below still reference its node ids. index.js merges the graphs.
+
   {
     id: 'ndfeb-magnet-traction',
     label: 'NdFeB traction magnets',
@@ -314,8 +298,6 @@ export const nodes = [
   { id: 'gr-anode-jp', stageId: 'graphite-anode', country: 'JP', lat: 35.0, lon: 137.0, share: 0.03, alignment: 'allied', confidence: 'derived', source: 'IEA CMO' },
 
   // rare earths (shared with wind)
-  { id: 'ree-sep-cn', stageId: 'ree-separation', country: 'CN', lat: 40.8, lon: 111.7, share: 0.9, alignment: 'exposed', confidence: 'sourced', source: 'USGS MCS' },
-  { id: 'ree-sep-my', stageId: 'ree-separation', country: 'MY', lat: 4.3, lon: 101.1, share: 0.06, alignment: 'allied', confidence: 'derived', source: 'USGS MCS' },
   { id: 'ndfeb-ev-cn', stageId: 'ndfeb-magnet-traction', country: 'CN', lat: 29.9, lon: 121.6, share: 0.87, alignment: 'exposed', confidence: 'sourced', source: 'Adamas Intelligence' },
 
   // cell components

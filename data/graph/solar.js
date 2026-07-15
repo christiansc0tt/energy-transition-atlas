@@ -5,30 +5,8 @@
 
 export const stages = [
   // --- UPSTREAM SILICON ---
-  {
-    id: 'hpq-mining',
-    label: 'High-purity quartz (crucible grade)',
-    sectors: ['solar', 'ai-hardware'], // <-- shared: semiconductor wafers need the same crucibles
-    layer: 'mining',
-    material: 'high-purity-quartz',
-    C: 3, S: 2, L: 2, // 7
-    costShare: 'low',
-    carbon: null,
-    policy: ['No export controls — the exposure is geological, not political'],
-    confidence: 'modelled',
-    sources: ['USGS Mineral Commodity Summaries', 'Trade press — CONTESTED, see notes'],
-    notes:
-      'CONTESTED — FLAG THIS ON THE TAB. Crucible-grade quartz is heavily associated with ' +
-      'Spruce Pine, North Carolina. The near-monopoly framing is widely repeated in trade ' +
-      'press and just as widely disputed: Norway, Russia and China have deposits, and the ' +
-      'binding question is grade and processing know-how, not the presence of rock. ' +
-      'We score C=3 not C=4 deliberately — the evidence does not support monopoly. ' +
-      'Give a range, do not repeat the headline uncritically. ' +
-      'ANALYTICALLY IMPORTANT: this node is ALLIED and still fragility 7. It is the cleanest ' +
-      'proof in the atlas that concentration risk is not the same as geopolitical risk, ' +
-      'and the reason alignment is a separate filter rather than part of the score. ' +
-      'A hurricane is not a trade war and the map should not colour them the same.',
-  },
+  // NOTE: 'hpq-mining' now lives in shared.js — it serves solar and AI hardware.
+
   {
     id: 'mg-si',
     label: 'Metallurgical-grade silicon',
@@ -104,7 +82,7 @@ export const stages = [
       'That is a different shock shape from graphite and the simulator must model it differently.',
   },
   {
-    id: 'cell',
+    id: 'pv-cell',
     label: 'Cell manufacture',
     sectors: ['solar'],
     layer: 'component',
@@ -181,23 +159,6 @@ export const stages = [
       'Module assembly without wafer access is import substitution with extra steps.',
   },
   {
-    id: 'inverter',
-    label: 'Inverters',
-    sectors: ['solar', 'grid'],
-    layer: 'component',
-    material: 'power-electronics',
-    C: 3, S: 0, L: 0, // 3
-    costShare: 'mid',
-    carbon: null,
-    policy: ['US/EU scrutiny of Chinese inverters on grid-security grounds'],
-    confidence: 'modelled',
-    sources: ['IEA Solar PV Global Supply Chains'],
-    notes:
-      'Low fragility, but the only node in the solar chain with a CYBER/grid-security ' +
-      'dimension rather than a materials one. The schema has no field for this and ' +
-      'probably should not — flag it in notes and move on.',
-  },
-  {
     id: 'deployment',
     label: 'Installation & deployment',
     sectors: ['solar'],
@@ -214,8 +175,6 @@ export const stages = [
 ];
 
 export const nodes = [
-  { id: 'hpq-us', stageId: 'hpq-mining', country: 'US', lat: 35.9, lon: -82.1, share: 0.7, alignment: 'allied', confidence: 'modelled', source: 'Trade press — contested' },
-  { id: 'hpq-no', stageId: 'hpq-mining', country: 'NO', lat: 58.3, lon: 8.6, share: 0.1, alignment: 'allied', confidence: 'modelled', source: 'Trade press — contested' },
 
   { id: 'mgsi-cn', stageId: 'mg-si', country: 'CN', lat: 26.6, lon: 101.7, share: 0.78, alignment: 'exposed', confidence: 'sourced', source: 'USGS MCS' },
   { id: 'mgsi-br', stageId: 'mg-si', country: 'BR', lat: -19.9, lon: -44.0, share: 0.05, alignment: 'neutral', confidence: 'sourced', source: 'USGS MCS' },
@@ -229,9 +188,9 @@ export const nodes = [
   { id: 'wafer-cn', stageId: 'ingot-wafer', country: 'CN', lat: 34.3, lon: 108.9, share: 0.97, alignment: 'exposed', confidence: 'sourced', source: 'IEA Solar PV GSC' },
   { id: 'wafer-other', stageId: 'ingot-wafer', country: 'VN', lat: 21.0, lon: 105.8, share: 0.02, alignment: 'neutral', confidence: 'derived', source: 'IEA Solar PV GSC' },
 
-  { id: 'cell-cn', stageId: 'cell', country: 'CN', lat: 31.3, lon: 120.6, share: 0.85, alignment: 'exposed', confidence: 'sourced', source: 'IEA Solar PV GSC' },
-  { id: 'cell-sea', stageId: 'cell', country: 'VN', lat: 21.0, lon: 105.8, share: 0.08, alignment: 'neutral', confidence: 'derived', source: 'IEA Solar PV GSC' },
-  { id: 'cell-in', stageId: 'cell', country: 'IN', lat: 22.3, lon: 70.8, share: 0.04, alignment: 'allied', confidence: 'derived', source: 'IEA Solar PV GSC' },
+  { id: 'pv-cell-cn', stageId: 'pv-cell', country: 'CN', lat: 31.3, lon: 120.6, share: 0.85, alignment: 'exposed', confidence: 'sourced', source: 'IEA Solar PV GSC' },
+  { id: 'pv-cell-sea', stageId: 'pv-cell', country: 'VN', lat: 21.0, lon: 105.8, share: 0.08, alignment: 'neutral', confidence: 'derived', source: 'IEA Solar PV GSC' },
+  { id: 'pv-cell-in', stageId: 'pv-cell', country: 'IN', lat: 22.3, lon: 70.8, share: 0.04, alignment: 'allied', confidence: 'derived', source: 'IEA Solar PV GSC' },
 
   { id: 'ag-mine-mx', stageId: 'silver-mining', country: 'MX', lat: 23.6, lon: -102.5, share: 0.24, alignment: 'neutral', confidence: 'sourced', source: 'USGS MCS' },
   { id: 'ag-mine-cn', stageId: 'silver-mining', country: 'CN', lat: 34.3, lon: 108.9, share: 0.14, alignment: 'exposed', confidence: 'sourced', source: 'USGS MCS' },
@@ -244,8 +203,6 @@ export const nodes = [
   { id: 'mod-in', stageId: 'module', country: 'IN', lat: 22.3, lon: 70.8, share: 0.05, alignment: 'allied', confidence: 'derived', source: 'IEA Solar PV GSC' },
   { id: 'mod-us', stageId: 'module', country: 'US', lat: 33.4, lon: -111.9, share: 0.04, alignment: 'allied', confidence: 'derived', source: 'IEA Solar PV GSC' },
 
-  { id: 'inv-cn', stageId: 'inverter', country: 'CN', lat: 36.7, lon: 117.0, share: 0.7, alignment: 'exposed', confidence: 'sourced', source: 'IEA Solar PV GSC' },
-  { id: 'inv-eu', stageId: 'inverter', country: 'DE', lat: 51.2, lon: 9.5, share: 0.1, alignment: 'allied', confidence: 'derived', source: 'IEA Solar PV GSC' },
 
   { id: 'deploy-cn', stageId: 'deployment', country: 'CN', lat: 35.0, lon: 105.0, share: 0.4, alignment: 'exposed', confidence: 'sourced', source: 'IEA Renewables' },
   { id: 'deploy-eu', stageId: 'deployment', country: 'DE', lat: 51.2, lon: 9.5, share: 0.15, alignment: 'allied', confidence: 'sourced', source: 'IEA Renewables' },
@@ -270,22 +227,22 @@ export const edges = [
   { from: 'poly-de', to: 'wafer-other', volumeShare: 0.3, confidence: 'modelled' },
   { from: 'poly-us', to: 'wafer-other', volumeShare: 0.5, confidence: 'modelled' },
 
-  { from: 'wafer-cn', to: 'cell-cn', volumeShare: 0.85, confidence: 'modelled' },
-  { from: 'wafer-cn', to: 'cell-sea', volumeShare: 0.9, confidence: 'modelled' },
-  { from: 'wafer-cn', to: 'cell-in', volumeShare: 0.85, confidence: 'modelled' },
-  { from: 'wafer-other', to: 'cell-sea', volumeShare: 0.1, confidence: 'modelled' },
+  { from: 'wafer-cn', to: 'pv-cell-cn', volumeShare: 0.85, confidence: 'modelled' },
+  { from: 'wafer-cn', to: 'pv-cell-sea', volumeShare: 0.9, confidence: 'modelled' },
+  { from: 'wafer-cn', to: 'pv-cell-in', volumeShare: 0.85, confidence: 'modelled' },
+  { from: 'wafer-other', to: 'pv-cell-sea', volumeShare: 0.1, confidence: 'modelled' },
 
   // silver -> cell (metallisation paste)
-  { from: 'ag-mine-mx', to: 'cell-cn', volumeShare: 0.3, confidence: 'modelled' },
-  { from: 'ag-mine-cn', to: 'cell-cn', volumeShare: 0.6, confidence: 'modelled' },
-  { from: 'ag-mine-pe', to: 'cell-cn', volumeShare: 0.3, confidence: 'modelled' },
+  { from: 'ag-mine-mx', to: 'pv-cell-cn', volumeShare: 0.3, confidence: 'modelled' },
+  { from: 'ag-mine-cn', to: 'pv-cell-cn', volumeShare: 0.6, confidence: 'modelled' },
+  { from: 'ag-mine-pe', to: 'pv-cell-cn', volumeShare: 0.3, confidence: 'modelled' },
 
   // cell + glass -> module
-  { from: 'cell-cn', to: 'mod-cn', volumeShare: 0.85, confidence: 'modelled' },
-  { from: 'cell-cn', to: 'mod-sea', volumeShare: 0.5, confidence: 'modelled' },
-  { from: 'cell-cn', to: 'mod-us', volumeShare: 0.6, confidence: 'modelled' },
-  { from: 'cell-sea', to: 'mod-sea', volumeShare: 0.5, confidence: 'modelled' },
-  { from: 'cell-in', to: 'mod-in', volumeShare: 0.9, confidence: 'modelled' },
+  { from: 'pv-cell-cn', to: 'mod-cn', volumeShare: 0.85, confidence: 'modelled' },
+  { from: 'pv-cell-cn', to: 'mod-sea', volumeShare: 0.5, confidence: 'modelled' },
+  { from: 'pv-cell-cn', to: 'mod-us', volumeShare: 0.6, confidence: 'modelled' },
+  { from: 'pv-cell-sea', to: 'mod-sea', volumeShare: 0.5, confidence: 'modelled' },
+  { from: 'pv-cell-in', to: 'mod-in', volumeShare: 0.9, confidence: 'modelled' },
   { from: 'glass-cn', to: 'mod-cn', volumeShare: 0.9, confidence: 'modelled' },
   { from: 'glass-cn', to: 'mod-sea', volumeShare: 0.9, confidence: 'modelled' },
   { from: 'glass-cn', to: 'mod-us', volumeShare: 0.8, confidence: 'modelled' },
